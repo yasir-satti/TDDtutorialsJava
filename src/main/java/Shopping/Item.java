@@ -1,3 +1,5 @@
+package Shopping;
+
 public class Item{
 
     private final double unitPrice;

@@ -41,14 +41,14 @@ exctracted into a private method and passed basket items as paramemter
 
 Wrote test for item with quantity 2 and failed
 
-Wrote code and made it pass. The ShoppingBasket.getTotal() was not taking into account the quantity value
+Wrote code and made it pass. The Shopping.ShoppingBasket.getTotal() was not taking into account the quantity value
 
 ### Refactor
 
-ShoppingBasket.getTotal() has un-encapsulated item ( item.getUnitPrice() * item.getQuantity() ). So:
+Shopping.ShoppingBasket.getTotal() has un-encapsulated item ( item.getUnitPrice() * item.getQuantity() ). So:
 
 1. extract into private method
-2. But this private method can be moved into Item class
+2. But this private method can be moved into Shopping.Item class
 3. But also methods getUnitPrice() and getQuantity() are no longer referenced so refactor > inline method which replaces them with unitPrice and quantity respectively
 
 
@@ -57,4 +57,43 @@ So overall:
 1. design is easy to understand
 2. removed duplication
 3. solved dependencies issues
-4. hidden details from ShoppingBasket class
+4. hidden details from Shopping.ShoppingBasket class
+
+## 2: Good TDD Habits ( Donate Movie )
+
+### Assert first ! then declare your references
+
+1. assertion first, so referencing objects that does not exists yet
+
+```java
+assertTrue(library.getCatalogue().contains(movie));
+```
+
+
+2. work backward from the refrence to the objects declarations
+
+Start declaring objects:
+- Library class, then
+- getCatalogue() method, then
+- Movie class, then
+- movie instance
+
+3. Declare objects
+```java
+Library library = new Library();
+Movie movie = new Movie();
+```
+4. action !
+```java
+library.donate(movie);
+```
+
+woops! method donate() is referenced but not delared. So declare it. Now you can action !
+
+5. Now assert !
+```java
+assertTrue(library.getCatalogue().contains(movie));
+```
+
+still fails, but will come to that...
+

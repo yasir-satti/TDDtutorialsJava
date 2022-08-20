@@ -1,3 +1,5 @@
+package Shopping;
+
 import java.util.List;
 
 public class ShoppingBasket {
