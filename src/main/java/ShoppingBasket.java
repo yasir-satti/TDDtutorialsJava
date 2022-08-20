@@ -10,6 +10,6 @@ public class ShoppingBasket {
 
     public double getTotal() {
         return items.stream()
-                .mapToDouble(item -> item.getUnitPrice()).sum();
+                .mapToDouble(item -> item.getUnitPrice() * item.getQuantity()).sum();
     }
 }
