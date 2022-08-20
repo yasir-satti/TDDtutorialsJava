@@ -35,3 +35,9 @@ Wrote code and made it pass
 Duplicated code in every test when creating a new basket
 
 exctracted into a private method and passed basket items as paramemter
+
+## Test 4
+
+Wrote test for item with quantity 2 and failed
+
+Wrote code and made it pass. The ShoppingBasket.getTotal() was not taking into account the quantity value
