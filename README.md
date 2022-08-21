@@ -163,5 +163,52 @@ public class Library {
 
 Test passes !
 
+## Refactoring
+
+The assertion has "message chain" where we are navigating from one object to another in the chain. So we un-encapsulated this list.
+```java
+library.getCatalogue().contains(movie)
+```
+So let us refactore:
+- encapsulate by moving to private method
+```java
+@Test
+public void donateMovie(){
+Library library = new Library();
+Movie movie = new Movie();
+library.donate(movie);
+assertTrue(contains(library, movie));
+}
+
+private boolean contains(Library library, Movie movie) {
+    return library.getCatalogue().contains(movie);
+}
+```
+
+run test to make sure it still passes !
+
+- Move it into Library class
+```java
+public class Library {
+
+    private Collection<Movie> catalogue = new ArrayList<>();
+
+    public Collection<Movie> getCatalogue() {
+        return catalogue;
+    }
+
+    public void donate(Movie movie) {
+        catalogue.add(movie);
+    }
+
+    public boolean contains(Movie movie) {
+        return getCatalogue().contains(movie);
+    }
+}
+```
+run test to make sure it still passes !
+
+
+
 
 
