@@ -39,6 +39,7 @@ public class ShoppingBasketTest {
     }
 
     private ShoppingBasket buildBasketWithItems(Item... items) {
+
         return new ShoppingBasket(Arrays.asList(items));
     }
 }
