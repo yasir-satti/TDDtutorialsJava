@@ -97,3 +97,71 @@ assertTrue(library.getCatalogue().contains(movie));
 
 still fails, but will come to that...
 
+
+### Run the test and see it fail because the answer is wrong before it passes
+
+1. run the test
+2. It fails with NullPpointerException
+```java
+java.lang.NullPointerException: Cannot invoke "java.util.Collection.contains(Object)" because the return value of "DonateMovie.Library.getCatalogue()" is null
+```
+
+This is because library.getCatalogue() is returning NULL
+```java
+public class Library {
+    public Collection<Movie> getCatalogue() {
+        return null;
+    }
+
+    public void donate(Movie movie) {
+    }
+}
+```
+
+So replace NULL with new ArrayList<> which is the wrong answer expected by the assertion
+```java
+public class Library {
+    public Collection<Movie> getCatalogue() {
+        return new ArrayList<>();
+    }
+
+    public void donate(Movie movie) {
+    }
+}
+```
+
+now run the test and we get...
+```java
+org.opentest4j.AssertionFailedError: 
+Expected :true
+Actual   :false
+```
+
+So the assertion now fails for the wrong answer. In this way we tested the assertion failes correctly.
+
+### Make the test pass
+
+So we need to do the following:
+- library.getCatalogue() to return a catalogue
+- librayr.donate() to add movie to the catalogue
+
+so 
+```java
+public class Library {
+
+    private Collection<Movie> catalogue = new ArrayList<>();
+
+    public Collection<Movie> getCatalogue() {
+        return catalogue;
+    }
+
+    public void donate(Movie movie) {
+        catalogue.add(movie);
+    }
+}
+```
+
+Test passes !
+
+
+
