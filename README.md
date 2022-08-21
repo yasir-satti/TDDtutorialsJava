@@ -61,6 +61,10 @@ So overall:
 
 ## 2: Good TDD Habits ( Donate Movie )
 
+- Write the Assert first and go back to write the setup
+- Run the test before you write the code to make sure it fails because of wrong answer and not an exception
+- TDD works better when a test has ONE reason to fail
+
 ### Assert first ! then declare your references
 
 1. assertion first, so referencing objects that does not exists yet
@@ -305,4 +309,51 @@ public class Library {
 ```
 run test to make sure it still passes !
 
+## ONE and ONLY one reason for a test to fail
 
+The test below can fail for either of the assetions
+```java
+@Test
+    public void donateMovie(){
+        Library library = new Library();
+        Movie movie = new Movie();
+        library.donate(movie);
+        assertTrue(library.contains(movie));
+        assertEquals(1, movie.getCopies());
+    }
+```
+This is not good! we need to have control over each test and know by DESIGN it will fail for one reason ONLY. So refactor:
+
+- declare library and movie in test class constructor
+```java
+public DonateMovieTest() {
+        library = new Library();
+        movie = new Movie();
+        }
+```
+move the second assertion into a separate test. Also rename first test to reflect what it is testing
+```java
+public class DonateMovieTest {
+
+    private final Library library;
+    private final Movie movie;
+
+    public DonateMovieTest() {
+        library = new Library();
+        movie = new Movie();
+    }
+
+    @Test
+    public void movieAddedToCatalogue(){
+        library.donate(movie);
+        assertTrue(library.contains(movie));
+    }
+
+    @Test
+    public void rentalCopyAdded(){
+        library.donate(movie);
+        assertEquals(1, movie.getCopies());
+    }
+
+}
+```

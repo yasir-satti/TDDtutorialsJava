@@ -7,12 +7,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DonateMovieTest {
 
+    private final Library library;
+    private final Movie movie;
+
+    public DonateMovieTest() {
+        library = new Library();
+        movie = new Movie();
+    }
+
     @Test
-    public void donateMovie(){
-        Library library = new Library();
-        Movie movie = new Movie();
+    public void movieAddedToCatalogue(){
         library.donate(movie);
         assertTrue(library.contains(movie));
+    }
+
+    @Test
+    public void rentalCopyAdded(){
+        library.donate(movie);
         assertEquals(1, movie.getCopies());
     }
 
