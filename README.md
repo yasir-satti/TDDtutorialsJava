@@ -17,39 +17,312 @@ Start adding methods and other classes as we attempt to make the tests pass
 ## 1: The 3 Steps of TDD ( Shopping basket totals )
 ### Test 1 & 2
 
-Wrote test 1 for an empty shopping basket and it fails !
+Wrote test 1 for an empty shopping basket
+```java
+public class ShoppingBasketTest {
 
-Wrote code and made it pass
+    @Test
+    public void totalOfEmptyBasket(){
+        ShoppingBasket basket = new ShoppingBasket();
+        assertEquals(0.0, basket.getTotal(), 0.0);
+    }
+}
+```
+But it complains the following objects do not exist ( because we did not write code yet ! ):
+- ShoppingBasket
+- basket.getTotal()
 
-Write test 2 for a basket with 1 item and it fails 
+So we need to declare them
+```java
+public class ShoppingBasket {
 
-Wrote code and made it pass
+    public double getTotal() {
+        return 0.0;
+    }
+}
+```
+Now run the test and it passes !
 
+Write test 2 for a basket with 1 item passed to the shopping basket and it fails 
+```java
+public class ShoppingBasketTest {
+
+    @Test
+    public void totalOfEmptyBasket(){
+        ShoppingBasket basket = new ShoppingBasket();
+        assertEquals(0.0, basket.getTotal(), 0.0);
+    }
+
+    @Test
+    public void totalOfSingleItem(){
+        ShoppingBasket basket = new ShoppingBasket(Arrays.asList(new Item(100.0, 1)));
+        assertEquals(100.0, basket.getTotal(), 0.0);
+    }
+}
+```
+It forces us to declare Item
+```java
+public class Item{
+    
+    public Item(double unitPrice, int quantity) {
+    }
+}
+```
+Also we need to declare constructor for ShoppingBasket class
+```java
+public ShoppingBasket(List<Item> items) {
+    }
+```
+Now the first test requires to pass list of items since the constructor requires it now
+
+```java
+import java.util.ArrayList;
+
+public class ShoppingBasketTest {
+
+ @Test
+ public void totalOfEmptyBasket() {
+  ShoppingBasket basket = new ShoppingBasket(ArrayList<>());
+  assertEquals(0.0, basket.getTotal(), 0.0);
+ }
+
+ @Test
+ public void totalOfSingleItem() {
+  ShoppingBasket basket = new ShoppingBasket(Arrays.asList(new Item(100.0, 1)));
+  assertEquals(100.0, basket.getTotal(), 0.0);
+ }
+}
+```
+Now run the test and it fails. Expecting 100.0 but gets 0.0
+
+This is because ShoppingBasket.getTotoal() return 0.0. We need to fix that.
+```java
+public class ShoppingBasket {
+
+    private final List<Item> items;
+
+    public ShoppingBasket(List<Item> items) {
+        this.items = items;
+    }
+
+    public double getTotal() {
+        if(items.isEmpty())
+            return 0.0;
+        return items.get(0).getUnitPrice();
+    }
+}
+```
+Now we need to fix item.getUnitPrice()
+```java
+public class Item{
+
+    private final double unitPrice;
+
+    public Item(double unitPrice, int quantity) {
+        this.unitPrice = unitPrice;
+    }
+
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+}
+```
+Run thes tests and they pass
 ### Test 3
 
-Wrote test 3 for basket with two items and failed
+Wrote test 3 for basket with two items
+```java
+@Test
+    public void totalOfTwoItems(){
+        ShoppingBasket basket = new ShoppingBasket(
+                Arrays.asList(
+                        new Item(100.0, 1),
+                        new Item(200.0, 1))
+        );
 
-Wrote code and made it pass
+        assertEquals(300.0, basket.getTotal(), 0.0);
+    }
+```
+Run the test but it fails. Expecting 300.0 but got 100.0
+
+The reason is that ShoppingBasket.getTotal() did not account for the quantity. So let us fix this
+```java
+public double getTotal() {
+        return items.stream()
+                .mapToDouble(item -> item.getUnitPrice()).sum();
+    }
+```
+
+Now the test passes
 
 ### Refactor
 
 Duplicated code in every test when creating a new basket
+```java
+ShoppingBasket basket = new ShoppingBasket(Arrays.asList(new Item(100.0, 1)));
+```
 
 exctracted into a private method and passed basket items as paramemter
+```java
+private ShoppingBasket buildBasketWithItems(Items... items){
+    return new Shoppingasket(
+            Arrays.asList(new Item(100.0, 1))
+        );
+}
+```
+So now building new basket becomes
+```java
+ShoppingBasket basket = buildBasketWithItems((new Item(100.0, 1)));
+```
+Run the test and it passes. So th refactoring makes it like this
+```java
+public class ShoppingBasketTest {
+
+    @Test
+    public void totalOfEmptyBasket(){
+        ShoppingBasket basket = buildBasketWithItems();
+        assertEquals(0.0, basket.getTotal(), 0.0);
+    }
+
+    @Test
+    public void totalOfSingleItem(){
+        ShoppingBasket basket = buildBasketWithItems(new Item(100.0, 1));
+        assertEquals(100.0, basket.getTotal(), 0.0);
+    }
+
+    @Test
+    public void totalOfTwoItems(){
+        ShoppingBasket basket = buildBasketWithItems(
+                    new Item(100.0, 1),
+                    new Item(200.0, 1)
+        );
+
+        assertEquals(300.0, basket.getTotal(), 0.0);
+    }
+
+    private ShoppingBasket buildBasketWithItems(Item... items) {
+        return new ShoppingBasket(Arrays.asList(items));
+    }
+}
+```
+
 
 ### Test 4
 
-Wrote test for item with quantity 2 and failed
+Wrote test for item with quantity 2
+```java
+@Test
+    public void totalOfItemWithQuantityTwo(){
+        ShoppingBasket basket = buildBasketWithItems(
+                new Item(100.0, 2)
+        );
+        assertEquals(200.0, basket.getTotal(), 0.0);
 
-Wrote code and made it pass. The Shopping.ShoppingBasket.getTotal() was not taking into account the quantity value
+    }
+```
+Now the test fails. The ShoppingBasket.getTotal() was not taking into account the quantity value. So we will fix this by adding item.getQuantity()
+```java
+public double getTotal() {
+        return items.stream()
+                .mapToDouble(item -> 
+        item.getUnitPrice() * item.getQuantity()).sum();
+    }
+```
+We add getQuantity() in Item class
+```java
+public class Item{
+
+    private final double unitPrice;
+    private final int quantity;
+
+    public Item(double unitPrice, int quantity) {
+
+        this.unitPrice = unitPrice;
+        this.quantity = quantity;
+    }
+
+    public double getUnitPrice() {
+        return unitPrice;
+    }
+
+    public double getQuantity() {
+        return quantity;
+    }
+}
+```
+Now the test passes
 
 ### Refactor
 
 Shopping.ShoppingBasket.getTotal() has un-encapsulated item ( item.getUnitPrice() * item.getQuantity() ). So:
 
-1. extract into private method
-2. But this private method can be moved into Shopping.Item class
-3. But also methods getUnitPrice() and getQuantity() are no longer referenced so refactor > inline method which replaces them with unitPrice and quantity respectively
+Extract into private method getSubTotal()
+```java
+public class ShoppingBasket {
+
+ private final List<Item> items;
+
+ public ShoppingBasket(List<Item> items) {
+  this.items = items;
+ }
+
+ public double getTotal() {
+  return items.stream()
+          .mapToDouble(item -> item.getSubtotal()).sum();
+ }
+ 
+ private double getSubTotal(Item item){
+     return item.getUnitPrice() * getQuanityt();
+ }
+} 
+```
+Run the test and it passes
+
+But this private method can be moved into Item class
+
+```java
+public class Item {
+
+ private final double unitPrice;
+ private final int quantity;
+
+ public Item(double unitPrice, int quantity) {
+
+  this.unitPrice = unitPrice;
+  this.quantity = quantity;
+ }
+
+ public double getUnitPrice() {
+  return unitPrice;
+ }
+
+ public int getQuantity() {
+  return quantity;
+ }
+
+ double getSubtotal() {
+  return getUnitPrice * getQuantity();
+ }
+}
+```
+But also methods getUnitPrice() and getQuantity() are no longer referenced so refactor > inline method which replaces them with unitPrice and quantity respectively
+```java
+public class Item{
+
+    private final double unitPrice;
+    private final int quantity;
+
+    public Item(double unitPrice, int quantity) {
+
+        this.unitPrice = unitPrice;
+        this.quantity = quantity;
+    }
+
+    double getSubtotal() {
+        return unitPrice * (double) quantity;
+    }
+}
+```
 
 
 So overall:
