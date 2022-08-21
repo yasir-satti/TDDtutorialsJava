@@ -208,7 +208,101 @@ public class Library {
 ```
 run test to make sure it still passes !
 
+## Effecient test assertion implementation
 
+Think of the assertion
+```java
+assertEquals(1, movie.getCopies());
+```
 
+So we could just hadcode the value in movie.getCopies()
+```java
+public class Movie {
+
+    public int getCopies() {
+        return 1;
+    }
+}
+```
+
+But this is not efficent f you want to go through a number of test cases. So a better implementation is to parametrise the copies in Movie class
+```java
+public class Movie {
+    private int copies;
+
+    public int getCopies() {
+        return copies;
+    }
+
+    public void addCopy() {
+        copies++;
+    }
+}
+```
+and add line movie.addCopy() when the book donation happens
+
+```java
+public class Library {
+
+    private Collection<Movie> catalogue = new ArrayList<>();
+
+    public Collection<Movie> getCatalogue() {
+        return catalogue;
+    }
+
+    public void donate(Movie movie) {
+        catalogue.add(movie);
+        movie.addCopy();
+    }
+
+    public boolean contains(Movie movie) {
+        return getMovieCollection().contains(movie);
+    }
+
+    private Collection<Movie> getMovieCollection() {
+        return getCatalogue();
+    }
+}
+```
+run test to make sure it still passes !
+
+Also method library.getCatalogue()
+ is no longer referenced
+```java
+public class Library {
+
+    private Collection<Movie> catalogue = new ArrayList<>();
+
+    public Collection<Movie> getCatalogue() {
+        return catalogue;
+    }
+
+    public void donate(Movie movie) {
+        catalogue.add(movie);
+        movie.addCopy();
+    }
+
+    public boolean contains(Movie movie) {
+        return getCatalogue().contains(movie);
+    }
+}
+```
+so we can remove it
+```java
+public class Library {
+
+    private Collection<Movie> catalogue = new ArrayList<>();
+
+    public void donate(Movie movie) {
+        catalogue.add(movie);
+        movie.addCopy();
+    }
+
+    public boolean contains(Movie movie) {
+        return catalogue.contains(movie);
+    }
+}
+```
+run test to make sure it still passes !
 
 
