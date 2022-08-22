@@ -1,5 +1,7 @@
 # Practicing TDD with Java
 
+Note: testing is done with [JUnit 5](https://junit.org/junit5/docs/current/user-guide/#writing-tests)
+
 TDD makes you:
 
 1. Write classes/methods/getters/setters in the test, but obviously fails because no code is written yet. So to make the test pass it forces you to go and write the code for these elements. So it forces you to write minimul code.
@@ -630,3 +632,117 @@ public class DonateMovieTest {
 
 }
 ```
+## 3: What Tests We Should Write? ( CDs: buy, search, .. )
+
+We could write tests for each element/object (cosntructor, getter, setter, method, module, ...etc).
+
+Here we face a few issues:
+1. Tests are based on the design rather than descovering best deisgn to writing tests
+2. Tests know too much about the internals of the deisgn and become coupled. So attepting to refactor will be very difficult 
+
+So we need to write with is known as "meaningful tests".
+
+We start at the requirements and create a tests list. So the requirements:
+
+Customers can buy CDs, searching on the title and the artist. Record labels send batches of CDs to the warehouse. Customers can only order titles that are in stock.
+
+Tests list:
+
+1. Buy a CD
+   - CD is in stock - stock count is reduced by quantity
+   - Insufficient stock - throw an exception
+
+2. Search for a CD
+   - It's in catologue - return the CD info
+   - No match - return nothing
+   - Multiple matches - return list
+
+3. Receive stock from a label:
+   - Single title that is in the catalogue - add copies to the CD's stock
+   - Not in the catalogue - dd it, and copies to it
+   - Multiple CDs - any new CDs added to catalogue, and stock added to each CD
+
+### Test 1: CD is in stock - stock count is reduced by 1
+
+so we start with assertion
+```java
+@Test
+    public void cdIsInStock() {
+        assertEquals(9, cd.getStockCount());
+    }
+```
+Then we go and declare the objects ( cd, cd.getStockCount() )
+```java
+public class CompactDisc {
+    private int stock;
+
+    public CompactDisc(int initialStock) {
+        this.stock = initialStock;
+    }
+
+    public int getStockCount() {
+        return stock;
+    }
+
+    public void buy(int quantity) {
+        stock -= quantity;
+    }
+}
+```
+do the action ( cd.buy(1) )
+```java
+@Test
+    public void cdIsInStock() throws InsufficientStockException {
+        CompactDisc cd = new CompactDisc(10);
+        cd.buy(1);
+        assertEquals(9, cd.getStockCount());
+    }
+```
+Run the test and it passes
+
+### Test 2: Insufficient stock - throw an exception
+
+Here we are testing that when there is insufficient stock to make a CD purchase then an exception is thrown. So the test is like
+```java
+@Test
+    public void InsufficientStock(){
+        Exception exception = assertThrows(InsufficientStockException.class, () -> {
+                    new CompactDisc(0).buy(1);
+                });
+    }
+```
+Then we declare InsufficientStockException class
+```java
+public class InsufficientStockException extends Exception{
+    public InsufficientStockException(String message){
+        super(message);
+    }
+}
+```
+This requires us to add Throws clause to buy method and first testion defintion
+```java
+@Test
+    public void cdIsInStock() throws InsufficientStockException {
+        CompactDisc cd = new CompactDisc(10);
+        cd.buy(1);
+        assertEquals(9, cd.getStockCount());
+    }
+```
+and cd.buy method
+```java
+public void buy(int quantity) throws InsufficientStockException {
+        if(stock < quantity)
+            throw new InsufficientStockException("Not enough stock to make the CD purchase");
+        stock -= quantity;
+    }
+```
+Run the test and it passes
+
+### Concluaion
+
+1. Test lists are good excercise to sit down with user/customer to capture test cases
+2. Working throw the requirements and tests list
+3. Think ahead is good but no coding yet
+4. Write tests for meaningful outcomes, outcomes users want to happen
+5. Some times the test implementations are obvious 
+6. As you gain experience you realise you need less tests, and the criteria is not how many tests you write.

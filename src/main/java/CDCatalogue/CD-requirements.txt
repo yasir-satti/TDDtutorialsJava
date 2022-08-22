@@ -1,0 +1,17 @@
+Customers can buy CDs, searching on the title and the artist. Record labels send batches of CDs to the warehouse. Customers can only order titles that are in stock.
+
+Tests list:
+
+1. Buy a CD
+   - CD is in stock - stock count is reduced by quantity
+   - Insufficient stock - throw an exception
+
+2. Search for a CD
+   - It's in catologue - return the CD info
+   - No match - return nothing
+   - Multiple matches - return list
+
+3. Receive stock from a label:
+   - Single title that is in the catalogue - add copies to the CD's stock
+   - Not in the catalogue - dd it, and copies to it
+   - Multiple CDs - any new CDs added to catalogue, and stock added to each CD
