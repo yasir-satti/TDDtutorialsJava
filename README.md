@@ -746,3 +746,49 @@ Run the test and it passes
 4. Write tests for meaningful outcomes, outcomes users want to happen
 5. Some times the test implementations are obvious 
 6. As you gain experience you realise you need less tests, and the criteria is not how many tests you write.
+
+## 4: Duplication and Design ( Mars Rover navigation)
+
+1. Duplication is the opposite of re-use 
+2. Removing duplication introduces re-sue abstraction 
+
+### Test rover navigation
+
+Wrote a test assertion to check Mars Rover has navigated turning right, fo from facing Noth it should face East
+```java
+public class MarsRoverTest {
+
+   @Test
+   public void TurnRightNorthToEast() {
+      Rover rover = new Rover("N");
+      rover.go("R");
+      assertEquals("E", rover.getFacing());
+   }
+}
+```
+Then implemented the Rover class and its methods getFacing() ang go()
+```java
+public class Rover {
+    private String facing;
+
+    public Rover(String facing) {
+        this.facing = facing;
+    }
+
+    public String getFacing() {
+        return facing;
+    }
+
+    public void go(String instruction) {
+        if (facing == "N")
+            facing = "E";
+        else if (facing == "E")
+            facing = "S";
+        else if (facing == "S")
+            facing = "W";
+        else
+            facing = "N";
+    }
+}
+```
+
