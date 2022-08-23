@@ -16,6 +16,6 @@ public class Rover {
     public void go(String instruction) {
         String[] campass = new String[]{"N", "E", "S", "W"};
         int index = Arrays.asList(campass).indexOf(facing);
-        facing = campass[index + 1];
+        facing = campass[(index + 1) % 4];
     }
 }

@@ -799,5 +799,33 @@ Now we can spot a pattern here in rover.go():
 
 So we can refactor grover.go() method
 ```java
+public void go(String instruction) {
+        String[] campass = new String[]{"N", "E", "S", "W"};
+        int index = Arrays.asList(campass).indexOf(facing);
+        facing = campass[index + 1];
+    }
+```
+### Refactor: remove test duplication
 
+The three tests have the same behavior just with different inputs. So we can refactor by removing this duplication, but you must take into account that emoving duplication might lead to difficulty understating what a test does so it is important to name the test helper method clearly explaining what it is doing
+
+So we can use paramaterised tests. Here the est vody has the beahavviour and all we need to do is pass parameters to test the behaviour.
+
+So our test class is now much reduced and even removed the other two tests
+```java
+public class MarsRoverTest {
+
+    @ParameterizedTest
+    @CsvSource({
+            "N, E",
+            "E, S",
+            "S, W",
+            "W, N"
+    })
+    public void TurnRightClockwise(String startsFacing, String endsFacing){
+        Rover rover = new Rover(startsFacing);
+        rover.go("R");
+        assertEquals(endsFacing, rover.getFacing());
+    }
+}
 ```
