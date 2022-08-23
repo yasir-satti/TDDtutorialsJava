@@ -1,5 +1,7 @@
 package Rover;
 
+import java.util.Arrays;
+
 public class Rover {
     private String facing;
 
@@ -12,13 +14,8 @@ public class Rover {
     }
 
     public void go(String instruction) {
-        if (facing == "N")
-            facing = "E";
-        else if (facing == "E")
-            facing = "S";
-        else if (facing == "S")
-            facing = "W";
-        else
-            facing = "N";
+        String[] campass = new String[]{"N", "E", "S", "W"};
+        int index = Arrays.asList(campass).indexOf(facing);
+        facing = campass[index + 1];
     }
 }

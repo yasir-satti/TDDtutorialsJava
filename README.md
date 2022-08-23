@@ -791,4 +791,13 @@ public class Rover {
     }
 }
 ```
+#### Refactoring: The Rule of Three
+Now we can spot a pattern here in rover.go():
 
+1. When spotting a pattern the rule of thee, in general, says to wait until you a pattern repeated three times then refactor
+2. Waiting too long can render the refactorng too difficult ans the codebase grows in complexity
+
+So we can refactor grover.go() method
+```java
+
+```
