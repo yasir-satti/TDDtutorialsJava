@@ -829,3 +829,64 @@ public class MarsRoverTest {
     }
 }
 ```
+### Refactor: some test duplication is good
+Let us test the rover turning LEFT.
+
+If you try using the test method it will become complicated and not easy to understand what is happening. This where some duplication is good.
+```java
+@ParameterizedTest
+    @CsvSource({
+            "N, W",
+            "W, S",
+            "S, E",
+            "E, N"
+    })
+    public void TurnLeftAntiClockwise(String startsFacing, String endsFacing){
+        Rover rover = new Rover(startsFacing);
+        rover.go("L");
+        assertEquals(endsFacing, rover.getFacing());
+    }
+```
+R8nning the test will fail because rover.go() does not understand how to turn left. So let us fix that
+```java
+public void go(String instruction) {
+        if(instruction == "R") {
+            String[] campass = new String[]{"N", "E", "S", "W"};
+            int index = Arrays.asList(campass).indexOf(facing);
+            facing = campass[(index + 1) % 4];
+        } else{
+            String[] campass = new String[]{"W", "S", "E", "N"};
+            int index = Arrays.asList(campass).indexOf(facing);
+            facing = campass[(index + 1) % 4];
+        }
+    }
+```
+We can furthur refactor rover.go()
+1. we turn to a soecific direction left or right
+2. this defines how the campass is formatted
+so we end up with helper methods right() and left
+
+Also the turn depends on the campass direction
+```java
+public void go(String instruction) {
+        if(instruction == "R") {
+            right();
+        } else{
+            left();
+        }
+    }
+
+    private void right() {
+        turn("N", "E", "S", "W");
+    }
+
+    private void left() {
+        turn("W", "S", "E", "N");
+    }
+
+    private void turn(String n, String e, String s, String w) {
+        String[] campass = new String[]{n, e, s, w};
+        int index = Arrays.asList(campass).indexOf(facing);
+        facing = campass[(index + 1) % 4];
+    }
+```

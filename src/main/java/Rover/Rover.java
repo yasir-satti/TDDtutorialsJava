@@ -14,7 +14,23 @@ public class Rover {
     }
 
     public void go(String instruction) {
-        String[] campass = new String[]{"N", "E", "S", "W"};
+        if(instruction == "R") {
+            right();
+        } else{
+            left();
+        }
+    }
+
+    private void right() {
+        turn("N", "E", "S", "W");
+    }
+
+    private void left() {
+        turn("W", "S", "E", "N");
+    }
+
+    private void turn(String n, String e, String s, String w) {
+        String[] campass = new String[]{n, e, s, w};
         int index = Arrays.asList(campass).indexOf(facing);
         facing = campass[(index + 1) % 4];
     }
