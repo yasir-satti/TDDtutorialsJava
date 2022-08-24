@@ -1,4 +1,5 @@
 import Rover.RoverInOut;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -44,5 +45,13 @@ public class MarsRoverInOutTest {
         roverInOut.mapInstructionToCommand(instruction).run();
         assertEquals(endsFacing, roverInOut.getFacing());
         assertArrayEquals(new int[]{endX, endY}, roverInOut.getPosition());
+    }
+
+    @Test
+    public void executesSequenceOfInsttructions(){
+        RoverInOut roverInOut = new RoverInOut("N", 5, 5);
+        roverInOut.go("RFF");
+        assertEquals("E", roverInOut.getFacing());
+        assertArrayEquals(new int[]{7, 5}, roverInOut.getPosition());
     }
 }
