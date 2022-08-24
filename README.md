@@ -890,3 +890,127 @@ public void go(String instruction) {
         facing = campass[(index + 1) % 4];
     }
 ```
+
+## 5: Inside out TDD ( Mars Rover navigation 2.0 )
+### Tests are couplled with internals
+
+Here we started by testing parts of the implementation. This prepares for later putting it all together for whole solution.
+
+So we started writing tests for parts of the internal implementation:
+
+roverInOut.right()
+<br>roverInOut.left()
+<br>roverInOut.forward()
+<br>roverInOut.back()
+<br>helper method to map commands to instructions mapToCommand()
+```java
+public class MarsRoverInOutTest {
+    @ParameterizedTest
+    @CsvSource({
+            "N, E",
+            "E, S",
+            "S, W",
+            "W, N"
+    })
+    public void TurnRightClockwise(String startsFacing, String endsFacing){
+        RoverInOut roverInOut = new RoverInOut(startsFacing, 0, 0);
+        roverInOut.right();
+        assertEquals(endsFacing, roverInOut.getFacing());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "N, W",
+            "W, S",
+            "S, E",
+            "E, N"
+    })
+    public void TurnLeftAntiClockwise(String startsFacing, String endsFacing){
+        RoverInOut rover = new RoverInOut(startsFacing, 0, 0);
+        rover.left();
+        assertEquals(endsFacing, rover.getFacing());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "F,N,5,6",
+            "B,N,5,4",
+            "R,E,5,5",
+            "L,W,5,5"
+    })
+    public void InstructionToCommand(Character instruction, String endsFacing, int endX, int endY){
+        RoverInOut roverInOut = new RoverInOut("N", 5, 5);
+        roverInOut.mapInstructionToCommand(instruction).run();
+        assertEquals(endsFacing, roverInOut.getFacing());
+        assertArrayEquals(new int[]{endX, endY}, roverInOut.getPosition());
+    }
+}
+```
+Looking at the RoverInOut class implementation we can sse how the tests are tightly couplled with its internals
+```java
+public class RoverInOut {
+    private String facing;
+    private int endY;
+    private int endX;
+
+    public RoverInOut(String facing, int x, int y) {
+        this.facing = facing;
+        this.endX = x;
+        this.endY = y;
+    }
+
+    public String getFacing() {
+        
+        return facing;
+    }
+
+    public int[] getPosition() {
+        return new int[]{endX, endY};
+    }
+
+    public Runnable mapInstructionToCommand(Character instruction) {
+        Map<Character, Runnable> commands = new HashMap<Character, Runnable>();
+        commands.put('F', this::forward);
+        commands.put('B', this::back);
+        commands.put('R', this::right);
+        commands.put('L', this::left);
+        return commands.get(instruction);
+    }
+
+    public void right() {
+        turn("N", "E", "S", "W");
+    }
+
+    public void left() {
+        turn("W", "S", "E", "N");
+    }
+
+    private void forward() {
+        if (facing == "N")
+           endY += 1;
+        else if (facing == "E")
+            endX += 1;
+        else if (facing == "S")
+            endY -= 1;
+        else if (facing == "W")
+            endX -= 1;
+    }
+
+    private void back() {
+        if (facing == "N")
+            endY -= 1;
+        else if (facing == "E")
+            endX -= 1;
+        else if (facing == "S")
+            endY += 1;
+        else if (facing == "W")
+            endX += 1;
+    }
+
+    private void turn(String n, String e, String s, String w) {
+        String[] campass = new String[]{n, e, s, w};
+        int index = Arrays.asList(campass).indexOf(facing);
+        facing = campass[(index + 1) % 4];
+    }
+}
+```
