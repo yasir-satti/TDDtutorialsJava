@@ -68,4 +68,11 @@ public class RoverInOut {
         int index = Arrays.asList(campass).indexOf(facing);
         facing = campass[(index + 1) % 4];
     }
+
+    public void go(String instruction) {
+        instruction.chars().
+                forEach(
+                        c -> mapInstructionToCommand((char)c).run()
+                );
+    }
 }

@@ -1014,3 +1014,36 @@ public class RoverInOut {
     }
 }
 ```
+### Write tests for Rover navigation
+
+Now let us write test for rover sequence of instructions starting with assertions and working backward
+```java
+@Test
+    public void executesSequenceOfInsttructions(){
+        RoverInOut roverInOut = new RoverInOut("N", 5, 5);
+        roverInOut.go("RFF");
+        assertEquals("E", roverInOut.getFacing());
+        assertArrayEquals(new int[]{7, 5}, roverInOut.getPosition());
+    }
+```
+The method roverIntOut.go() is a new one where it is the high level action that triggers which direction to trun to and the movement. So now we need to declare it
+```java
+public void go(String instruction) {
+        instruction.chars().
+                forEach(
+                        c -> mapInstructionToCommand((char)c).run()
+                );
+    }
+```
+Here it takes the the instruction string, for example "RFF", and loops for each charachter runs the relevant method via mapToCommand() method..
+
+So now this test is the high level test that the user will be looking for.
+
+### Conclusion
+
+Advantage:
+- Each of the tests pinpints to a specific part of the internal design, so when a test fails we know were and why it failed
+
+Disadvantage:
+- The tests know alot about the internal design of the rover exposing our test code to internals of our code. This means it will be difficult to refactor because then you have to also change the tests after changing the code.
+- Sometimes when trying at the end to put the high level test together the difference pieces do not work 
