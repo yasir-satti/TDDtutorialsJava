@@ -16,6 +16,14 @@ Writing a test and it fails !
 
 Start adding methods and other classes as we attempt to make the tests pass
 
+## Contents
+1. The 3 Steps of TDD
+2. Good TDD Habits
+3. What Tests We Should Write?
+4. Duplication and Design
+5. Inside out TDD
+6. Scalling TDD with Stubs and Mocks
+
 ## 1: The 3 Steps of TDD ( Shopping basket totals )
 ### Test 1 & 2
 
