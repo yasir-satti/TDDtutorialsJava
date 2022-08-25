@@ -1047,3 +1047,123 @@ Advantage:
 Disadvantage:
 - The tests know alot about the internal design of the rover exposing our test code to internals of our code. This means it will be difficult to refactor because then you have to also change the tests after changing the code.
 - Sometimes when trying at the end to put the high level test together the difference pieces do not work 
+
+## 6: Scalling TDD with Stubs and Mocks ( Donate Movie 2.0 )
+### Test with stubs
+
+Here we have a movie library that has an external dependency; movie information (title and year) provided by an api when the imdb Id is provided with the request.
+
+So we started with the assertions for the title and year and work backward
+```java
+@Test
+    public void donateMovieAddedToCatalogueWithImdbInfo(){
+        String ImdbId = "tt12345";
+        String title = "The Abyss";
+        int year = 1989;
+        LibraryStubMock libraryStubMock = new LibraryStubMock(movieInfo);
+        libraryStubMock.donate(ImdbId);
+        MovieStubMock movieStubMock = libraryStubMock.findMovie(ImdbId);
+        assertEquals(title, movieStubMock.getTitle());
+        assertEquals(year, movieStubMock.getYear());
+    }
+```
+Here we need to declare movieInfo which will contain the needed movie information (title and year).
+
+We will define it as interface object
+```java
+public interface MovieInfo {
+}
+```
+Then will inject the needed information using a stub StubMovieInfo which implements the MovieInfo interface
+```java
+@Test
+    public void donateMovieAddedToCatalogueWithImdbInfo(){
+        String ImdbId = "tt12345";
+        String title = "The Abyss";
+        int year = 1989;
+        MovieInfo movieInfo = new StubMovieInfo(title, year);
+        LibraryStubMock libraryStubMock = new LibraryStubMock(movieInfo);
+        libraryStubMock.donate(ImdbId);
+        MovieStubMock movieStubMock = libraryStubMock.findMovie(ImdbId);
+        assertEquals(title, movieStubMock.getTitle());
+        assertEquals(year, movieStubMock.getYear());
+    }
+
+    private class StubMovieInfo implements MovieInfo {
+        public StubMovieInfo(String title, int year) {
+        }
+    }
+```
+for our test to fail for the wrong title and year we need to return MovieStubMock() object and when we call librayrStubMock.findMovie() we return incorrect values
+```java
+public class MovieStubMock {
+   public MovieStubMock(String imdbId) {
+   }
+
+   public String getTitle() {
+      return "";
+   }
+
+   public int getYear() {
+      return 0;
+   }
+}
+
+public class LibraryStubMock {
+    public LibraryStubMock(MovieInfo movieInfo) {
+    }
+
+    public MovieStubMock findMovie(String imdbId) {
+        return new MovieStubMock("");
+    }
+
+    public void donate(String imdbId) {
+    }
+}
+```
+Now let us make our test pass for the correct values.
+
+1. The assertions use movieStubMock to get the title and year, so 
+2. we need to declare movieStubMock, 
+3. It is returned as we search the libraryStubMock using the imdbId value,
+4. The movieStubMock is donated by using the imdbId value
+
+So we start by declaring the libraryStubMock.donate()
+
+Our movie catalogue has imdbId as its key and the value is MovieStubMock object containing the title and year
+```java
+public void donate(String imdbId) {
+        Map<String, String> info = movieInfo.fetch(imdbId);
+        catalogue.put(
+                imdbId,
+                new MovieStubMock(
+                        info.get("title"),
+                        Integer.parseInt(info.get("year")))
+        );
+    }
+```
+When the donation is called this causes our stub to pass the movie info using movieInfo.fetch()
+```java
+private class StubMovieInfo implements MovieInfo {
+        private final String title;
+        private final int year;
+
+        public StubMovieInfo(String title, int year) {
+            this.title = title;
+            this.year = year;
+        }
+
+        public Map<String, String> fetch(String imdbId){
+            Map<String, String> info = new HashMap<>();
+            info.put("title", title);
+            info.put("year", Integer.toString(year));
+            return info;
+        }
+    }
+```
+So now we can use libraryStubMock.findMovie() to look for the movie with the imdbId value
+```java
+public MovieStubMock findMovie(String imdbId) {
+        return catalogue.get(imdbId);
+    }
+```
