@@ -1,12 +1,12 @@
-import DonateMovie.LibraryStubMock;
-import DonateMovie.MovieInfo;
-import DonateMovie.MovieStubMock;
+import DonateMovie.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class DonateMovieStubMockTest {
 
@@ -16,11 +16,24 @@ public class DonateMovieStubMockTest {
         String title = "The Abyss";
         int year = 1989;
         MovieInfo movieInfo = new StubMovieInfo(title, year);
-        LibraryStubMock libraryStubMock = new LibraryStubMock(movieInfo);
+        Emailserver emailserver = mock(Emailserver.class);
+        LibraryStubMock libraryStubMock = new LibraryStubMock(movieInfo, emailserver);
         libraryStubMock.donate(ImdbId);
         MovieStubMock movieStubMock = libraryStubMock.findMovie(ImdbId);
         assertEquals(title, movieStubMock.getTitle());
         assertEquals(year, movieStubMock.getYear());
+    }
+
+    @Test
+    public void membersEmailedAboutDonatedtitle() {
+        Emailserver emailserver = mock(Emailserver.class);
+        String title = "The Abyss";
+        String year = "1989";
+        new LibraryStubMock(new StubMovieInfo(title, Integer.parseInt(year)), emailserver).donate("");
+        verify(emailserver).sendEmail(
+                "New Movie",
+                "All members",
+                new String[]{title, year});
     }
 
     private class StubMovieInfo implements MovieInfo {

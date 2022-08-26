@@ -1175,3 +1175,108 @@ public MovieStubMock findMovie(String imdbId) {
         return catalogue.get(imdbId);
     }
 ```
+
+### Testing with Mocks
+
+There is a scenario where our logic calls commands, queries and triggers actions. So here we are not returning data, like in stubs, but we want to verify that the command, query or trigger has been invoked. This is where we use a mock object which allows us to test that the invokation did happen as expected.
+
+The mock object implements the interface of the class we are testing. So when the class is invoked the mock object internally remembers the invokation. Later we can assert that the invokation did happen and query its assciated data.
+
+So now we havea requirement to send email to members whenever a movie is donated.
+
+So we write a test to verify that the emailserver has been called whenever a movie is donated.
+```java
+@Test
+    public void membersEmailedAboutDonatedtitle() {
+        verify(emailserver).sendEmail(
+                "New Movie",
+                "All members",
+                new String[]{title, year});
+    }
+```
+So the email will have:
+1. template named New Movie
+2. Send to all members
+3. array with the movie title and year
+
+then we mock an isntance of Emailserver. This mocked object will remember when Emailserver is called.
+```java
+@Test
+    public void membersEmailedAboutDonatedtitle() {
+        Emailserver emailserver = mock(Emailserver.class);
+        verify(emailserver).sendEmail(
+                "New Movie",
+                "All members",
+                new String[]{title, year});
+    }
+```
+Now we need to implement method emailserver.sendEmail()
+```java
+public interface Emailserver {
+    void sendEmail(String template,
+                   String distributionList,
+                   String[] params);
+}
+```
+Now we need a movie title to donate. So we use our Stub to pass new movie data
+```java
+new LibraryStubMock(
+        new StubMovieInfo(title, Integer.parseInt(year)))
+        .donate("");
+```
+We run the test but fails saying emailerve was not invoked.
+
+So to do that we need to pass emailserver to libraryStubMock to inovkae emailserver after donate action
+```java
+new LibraryStubMock(
+        new StubMovieInfo(title, Integer.parseInt(year)), emailserver)
+        .donate("");
+```
+This forces us to modify the constructor
+```java
+public LibraryStubMock(MovieInfo movieInfo, Emailserver emailserver) {
+        this.movieInfo = movieInfo;
+        this.emailserver = emailserver;
+    }
+```
+After that we runthe emailserver.sendMail() method after donate action
+```java
+public class LibraryStubMock {
+    private final MovieInfo movieInfo;
+    private final Map<String, MovieStubMock> catalogue = new HashMap<String, MovieStubMock>();
+    private final Emailserver emailserver;
+
+    public LibraryStubMock(MovieInfo movieInfo, Emailserver emailserver) {
+        this.movieInfo = movieInfo;
+        this.emailserver = emailserver;
+    }
+
+    public MovieStubMock findMovie(String imdbId) {
+        return catalogue.get(imdbId);
+    }
+
+    public void donate(String imdbId) {
+        Map<String, String> info = movieInfo.fetch(imdbId);
+        catalogue.put(
+                imdbId,
+                new MovieStubMock(
+                        info.get("title"),
+                        Integer.parseInt(info.get("year")))
+        );
+        emailserver.sendEmail(
+                "New Movie", 
+                "All members", 
+                new String[]{
+                        info.get("title"), info.get("year")});
+    }
+}
+```
+Now we run the test and it passes.
+
+### Conclusion
+So Stubs and Mockes are useful:
+1. are usefull that stubs provide data when our logic requires fetching them. then the data is used to test our logic:
+2. We used data without concerning ourselves how, where or what. This is very powerful as it allows us to write tests quickly. It is called speration of concern
+3. We seperated our interface from our implementation providing felxibility. So if we want to fetch movie data from tomoato and not from imdb or sending sms text messages and not emails we can do that quickly
+4. All of this is the result of designing test from Outside In. This is exactly fits how customer requirements work and it is reflects in the tests.
+
